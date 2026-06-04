@@ -413,3 +413,56 @@ $shadow:       0 4px 24px rgba(0, 0, 0, 0.10);
   font-size: 13px;
   font-weight: 600;
 }
+
+.message-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+/* USER MESSAGE */
+.user-msg-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.user-msg {
+  background: #4caf50;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 18px 18px 0 18px;
+  max-width: 70%;
+  font-size: 14px;
+}
+
+/* BOT MESSAGE */
+.bot-msg-wrapper {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.bot-msg {
+  background: #f1f1f1;
+  color: #333;
+  padding: 10px 14px;
+  border-radius: 18px 18px 18px 0;
+  max-width: 70%;
+  font-size: 14px;
+}
+
+/* smooth message appearance */
+.message-group {
+  animation: fadeInUp 0.25s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
