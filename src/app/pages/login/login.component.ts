@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,11 @@ export class LoginComponent {
   error    = '';
   loading  = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private toastr: ToastrService
+  ) {}
 
   login() {
     if (!this.username || !this.password) {
@@ -29,14 +34,18 @@ export class LoginComponent {
     this.error   = '';
 
     this.auth.login(this.username, this.password).subscribe({
+
       next: () => {
         this.loading = false;
+        this.toastr.success('Login successful');
         this.router.navigate(['/admin/dashboard']);
       },
-      error: (err) => {
+
+      error: () => {
         this.loading = false;
-        this.error = err?.message || 'Login failed';
+        this.toastr.error('Invalid username or password');
       }
+
     });
   }
 }
