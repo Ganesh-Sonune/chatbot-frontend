@@ -15,7 +15,63 @@
 
       <div *ngIf="msg.type === 'bot'" class="bot-msg-wrapper">
         <div class="bot-avatar">CD</div>
-        <div class="bot-msg" [innerHTML]="formatMessage(msg.text)"></div>
+
+        <!-- Normal Bot Message -->
+        <div
+          *ngIf="!msg.isCourseCard"
+          class="bot-msg"
+          [innerHTML]="formatMessage(msg.text)">
+        </div>
+
+        <!-- Professional Course Cards -->
+        <div
+          *ngIf="msg.isCourseCard"
+          class="course-card-wrapper">
+
+          <div class="course-header">
+            🚀 Explore Our Popular Courses
+          </div>
+
+          <div
+            class="course-card"
+            *ngFor="let course of msg.courses">
+
+            <div class="course-top">
+              <div class="course-title">
+                {{ course.name }}
+              </div>
+
+              <div class="course-tag">
+                {{ course.mode }}
+              </div>
+            </div>
+
+            <div class="course-meta">
+
+              <div class="meta-item duration">
+                ⏱ {{ course.duration }} Months
+              </div>
+
+              <div
+                class="meta-item skills"
+                *ngIf="course.skills">
+                🛠 {{ course.skills }}
+              </div>
+
+            </div>
+
+            <div
+              class="course-highlight"
+              *ngIf="course.highlights">
+              ✨ {{ course.highlights }}
+            </div>
+
+            <div class="course-footer">
+              ✔ Practical Training & Placement Support
+            </div>
+
+          </div>
+        </div>
       </div>
 
       <div *ngIf="msg.options && msg.options.length && !msg.optionsUsed" class="options-box">

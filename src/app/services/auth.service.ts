@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
+import { catchError, throwError } from 'rxjs';
 
 export interface LoginResponse {
   token: string;
@@ -20,16 +21,33 @@ export class AuthService {
   login(username: string, password: string) {
     return this.http.post<LoginResponse>(`${this.API}/login`, { username, password })
       .pipe(
+
         tap(res => {
           sessionStorage.setItem(this.TOKEN_KEY, res.token);
-          sessionStorage.setItem(this.ROLE_KEY,  res.role);
+          sessionStorage.setItem(this.ROLE_KEY, res.role);
+        }),
+
+        catchError(err => {
+          let message = 'Something went wrong';
+
+          if (err.status === 401) {
+            message = 'Invalid username or password';
+          }
+
+          return throwError(() => new Error(message));
         })
+
       );
   }
 
+//   logout() {
+//     sessionStorage.removeItem(this.TOKEN_KEY);
+//     sessionStorage.removeItem(this.ROLE_KEY);
+//     this.router.navigate(['/login']);
+//   }
+
   logout() {
-    sessionStorage.removeItem(this.TOKEN_KEY);
-    sessionStorage.removeItem(this.ROLE_KEY);
+    sessionStorage.clear();
     this.router.navigate(['/login']);
   }
 
@@ -46,6 +64,6 @@ export class AuthService {
   }
 
   isAdmin(): boolean {
-    return this.getRole() === 'ROLE_ADMIN';
+    return (this.getRole() ?? '') === 'ROLE_ADMIN';
   }
 }
