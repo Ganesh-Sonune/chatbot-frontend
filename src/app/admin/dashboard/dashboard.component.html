@@ -5,7 +5,7 @@
 
 <div class="admin-shell">
 
-    <!-- ═══ SIDEBAR ═══ -->
+
     <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
         <div class="sidebar-header">
             <div class="brand">
@@ -60,10 +60,10 @@
         </div>
     </aside>
 
-    <!-- ═══ MAIN CONTENT ═══ -->
+
     <main class="main-content">
 
-        <!-- Top bar -->
+
         <div class="topbar">
             <h1 class="page-title">{{ pageTitle }}</h1>
             <div class="topbar-right">
@@ -71,7 +71,7 @@
             </div>
         </div>
 
-        <!-- ── DASHBOARD TAB ── -->
+
         <div *ngIf="activeTab === 'dashboard'" class="tab-content">
 
             <div class="stats-grid">
@@ -130,7 +130,6 @@
                 </div>
             </div>
 
-            <!-- Replace your charts-grid div with this -->
             <div class="charts-grid">
                 <div class="chart-card">
                     <h4 class="chart-title">Leads by Status</h4>
@@ -185,7 +184,7 @@
             </div>
         </div>
 
-        <!-- ── COURSES TAB ── -->
+
         <div *ngIf="activeTab === 'courses'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
@@ -255,7 +254,7 @@
             </div>
         </div>
 
-        <!-- ── FAQS TAB ── -->
+
         <div *ngIf="activeTab === 'faqs'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
@@ -313,7 +312,7 @@
             </div>
         </div>
 
-        <!-- ── INTENTS TAB ── -->
+
         <div *ngIf="activeTab === 'intents'" class="tab-content">
             <div class="toolbar">
                 <span class="toolbar-label">All Intents ({{ intents.length }})</span>
@@ -366,7 +365,7 @@
             </div>
         </div>
 
-        <!-- ── TRAINERS TAB ── -->
+
         <div *ngIf="activeTab === 'trainers'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
@@ -425,7 +424,7 @@
             </div>
         </div>
 
-        <!-- ── BOT CONFIG TAB ── -->
+
         <div *ngIf="activeTab === 'config'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
@@ -469,7 +468,7 @@
             </div>
         </div>
 
-        <!-- ── LEADS TAB ── -->
+
         <div *ngIf="activeTab === 'leads'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
@@ -543,7 +542,7 @@
             </div>
         </div>
 
-        <!-- ── REFERRALS TAB ── -->
+
         <div *ngIf="activeTab === 'referrals'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
@@ -612,14 +611,13 @@
                     (click)="referralPage = referralPage + 1; loadReferrals()">›</button>
             </div>
         </div>
-        
+
 
     </main>
 </div>
 
-<!-- ═══ MODALS ═══ -->
 
-<!-- Course Modal -->
+
 <div class="modal-overlay" *ngIf="modal === 'course'" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -655,6 +653,30 @@
                 <textarea class="form-input" rows="3" [(ngModel)]="courseForm.description"
                     placeholder="Course description…"></textarea>
             </div>
+
+          <div class="form-row">
+            <label>Batch Timing</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.batchTiming"
+              placeholder="e.g. Mon-Fri 7 PM - 9 PM" />
+          </div>
+
+          <div class="form-row">
+            <label>Next Batch Date</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.nextBatchDate"
+              placeholder="e.g. 15 June 2026" />
+          </div>
+
+          <div class="form-row">
+            <label>Brochure URL</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.brochureUrl"
+              placeholder="https://example.com/java-brochure.pdf" />
+          </div>
             <div class="form-row toggle-row">
                 <label>Active</label>
                 <input type="checkbox" [(ngModel)]="courseForm.isActive" />
@@ -670,7 +692,7 @@
     </div>
 </div>
 
-<!-- FAQ Modal -->
+
 <div class="modal-overlay" *ngIf="modal === 'faq'" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -703,7 +725,7 @@
 </div>
 
 
-<!-- Intent Modal -->
+
 <div class="modal-overlay" *ngIf="modal === 'intent'" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -746,7 +768,7 @@
     </div>
 </div>
 
-<!-- Trainer Modal -->
+
 <div class="modal-overlay" *ngIf="modal === 'trainer'" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -789,7 +811,7 @@
     </div>
 </div>
 
-<!-- Config Modal -->
+
 <div class="modal-overlay" *ngIf="modal === 'config'" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -818,7 +840,7 @@
     </div>
 </div>
 
-<!-- Toast -->
+
 <div class="toast" *ngIf="toast" [class.toast-error]="toastType === 'error'">
     {{ toast }}
 </div>

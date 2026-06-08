@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { forkJoin, of } from 'rxjs';                         
+import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';              // fixes forkJoin error
 import { Chart, registerables } from 'chart.js';          // fixes Chart error
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -12,7 +12,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 
 
-Chart.register(...registerables); 
+Chart.register(...registerables);
 
 const API = 'http://localhost:3000/api';
 
@@ -28,7 +28,7 @@ const API = 'http://localhost:3000/api';
 
 export class DashboardComponent implements OnInit {
 
-  // ── Layout ──
+
   sidebarCollapsed = false;
   activeTab = 'dashboard';
   modal: string | null = null;
@@ -56,57 +56,57 @@ export class DashboardComponent implements OnInit {
       intents: 'Intents',
       trainers: 'Trainers',
       config: 'Bot Config',
-      leads: 'Leads',      
+      leads: 'Leads',
       referrals: 'Referrals',
     };
     return titles[this.activeTab] ?? 'Dashboard';
   }
 
-  // ── Stats ──
+
   stats = { courses: 0, faqs: 0, intents: 0, trainers: 0 ,leads: 0 };
 
-  // ── Courses ──
+
   courses: any[] = [];
   coursePage = 0;
   courseTotalPages = 1;
   courseFilter = { name: '', mode: '', isActive: '' };
   courseForm: any = {};
 
-  // ── FAQs ──
+
   faqs: any[] = [];
   faqPage = 0;
   faqTotalPages = 1;
   faqFilter = { question: '', isActive: '' };
   faqForm: any = {};
 
-  // ── Intents ──
+
   intents: any[] = [];
   intentPage = 0;
   intentTotalPages = 1;
   intentForm: any = {};
 
-  // ── Trainers ──
+
   trainers: any[] = [];
   trainerPage = 0;
   trainerTotalPages = 1;
   trainerFilter = { name: '', specialization: '' };
   trainerForm: any = {};
 
-  // ── Configs ──
+
   configs: any[] = [];
   configPage = 0;
   configTotalPages = 1;
   configFilter = { key: '' };
   configForm: any = {};
 
-  // ── Leads ──
+
 leads: any[] = [];
 leadPage = 0;
 leadTotalPages = 1;
 leadFilter = { phone: '', status: '', requestType: '' };
 
 
-// ── Referrals — add after leads properties ──
+
 referrals: any[] = [];
 referralPage = 0;
 referralTotalPages = 1;
@@ -120,12 +120,11 @@ referralFilter = { referrerPhone: '', referredPhone: '', status: '' };
 
   ngOnInit() {
     this.loadStats();
-    setTimeout(() => this.loadCharts(), 200);  
+    setTimeout(() => this.loadCharts(), 200);
   }
 
-  // ══════════════════════════════════════════
-  // TAB NAVIGATION
-  // ══════════════════════════════════════════
+
+
   setTab(tab: string) {
     this.activeTab = tab;
     if (tab === 'courses') this.loadCourses();
@@ -142,9 +141,7 @@ referralFilter = { referrerPhone: '', referredPhone: '', status: '' };
     this.auth.logout();
   }
 
-  // ══════════════════════════════════════════
-  // STATS
-  // ══════════════════════════════════════════
+
   // loadStats() {
   //   this.http.get<any>(`${API}/courses?size=1`).subscribe(r => this.stats.courses = r.totalElements ?? 0);
   //   this.http.get<any>(`${API}/faqs?size=1`).subscribe(r => this.stats.faqs = r.totalElements ?? 0);
@@ -175,9 +172,7 @@ loadStats() {
   });
 }
 
-  // ══════════════════════════════════════════
-  // COURSES
-  // ══════════════════════════════════════════
+
   loadCourses() {
     let url = `${API}/courses?page=${this.coursePage}&size=8`;
     if (this.courseFilter.name) url += `&name=${this.courseFilter.name}`;
@@ -237,9 +232,8 @@ error:()=>this.showToast('Failed to toggle status.','error')
         error: () => this.showToast('Delete failed.', 'error')
       });
   }
-  // ══════════════════════════════════════════
-  // FAQS
-  // ══════════════════════════════════════════
+
+
   loadFaqs() {
     let url = `${API}/faqs?page=${this.faqPage}&size=8`;
     if (this.faqFilter.question) url += `&question=${this.faqFilter.question}`;
@@ -247,7 +241,7 @@ error:()=>this.showToast('Failed to toggle status.','error')
 
     this.http.get<any>(url).subscribe(res => {
       this.faqs = res ?? [];
-      
+
       this.faqTotalPages =  1;
     });
   }
@@ -278,7 +272,7 @@ error:()=>this.showToast('Failed to toggle status.','error')
 toggleFaqStatus(f: any) {
   this.http.patch(`${API}/faqs/${f.id}/status?status=${!f.status}`, {}, { responseType: 'text' })
     .subscribe({
-      next: () => { f.status = !f.status;this.loadStats();this.showToast('Status updated!'); },  // 
+      next: () => { f.status = !f.status;this.loadStats();this.showToast('Status updated!'); },  //
       error: () => this.showToast('Failed to toggle status.', 'error')
     });
 }
@@ -296,9 +290,7 @@ toggleFaqStatus(f: any) {
       });
   }
 
-  // ══════════════════════════════════════════
-  // INTENTS
-  // ══════════════════════════════════════════
+
   loadIntents() {
     this.http.get<any>(`${API}/intents?page=${this.intentPage}&size=8`).subscribe(res => {
       this.intents = res ?? [];
@@ -364,9 +356,7 @@ editIntent(i: any) {
       });
   }
 
-// ══════════════════════════════════════════
-// REFERRALS
-// ══════════════════════════════════════════
+
 loadReferrals() {
     let url = `${API}/referrals?page=${this.referralPage}&size=10`;
     if (this.referralFilter.referrerPhone) url += `&referrerPhone=${this.referralFilter.referrerPhone}`;
@@ -392,9 +382,7 @@ updateReferralStatus(id: number, event: Event) {
         });
 }
 
-  // ══════════════════════════════════════════
-  // TRAINERS
-  // ══════════════════════════════════════════
+
 loadTrainers(){
 let url=`${API}/trainers?page=${this.trainerPage}&size=8`;
 
@@ -458,12 +446,10 @@ this.trainerTotalPages=1;
       });
   }
 
-  // ══════════════════════════════════════════
-  // BOT CONFIG
-  // ══════════════════════════════════════════
+
 loadConfigs() {
   let url = `${API}/config?page=${this.configPage}&size=10`;
-  if (this.configFilter.key) url += `&key=${this.configFilter.key}`;  //  this is fine
+  if (this.configFilter.key) url += `&key=${this.configFilter.key}`;
 
   this.http.get<any>(url).subscribe(res => {
     this.configs = res ?? [];
@@ -472,10 +458,10 @@ loadConfigs() {
 }
 
  editConfig(cfg: any) {
-  this.editingKey = cfg.configKey;          //  was cfg.key
-  this.configForm = { 
-    key: cfg.configKey,                      //  map to form fields
-    value: cfg.configValue 
+  this.editingKey = cfg.configKey;
+  this.configForm = {
+    key: cfg.configKey,
+    value: cfg.configValue
   };
   this.modal = 'config';
 }
@@ -487,7 +473,7 @@ saveConfig() {
   }
   this.modalLoading = true;
   this.modalError = '';
-  const payload = { configKey: this.configForm.key, configValue: this.configForm.value };  
+  const payload = { configKey: this.configForm.key, configValue: this.configForm.value };
   const req = this.editingKey
     ? this.http.put(`${API}/config/${this.editingKey}`, payload)
     : this.http.post(`${API}/config`, payload);
@@ -507,11 +493,6 @@ deleteConfig(key: string) {
     });
 }
 
-// ══════════════════════════════════════════
-// Leads Config
-// ══════════════════════════════════════════
-
-
 loadLeads() {
     let url = `${API}/leads?page=${this.leadPage}&size=10&sortBy=id&direction=desc`;
     if (this.leadFilter.phone) url += `&phone=${this.leadFilter.phone}`;
@@ -526,7 +507,7 @@ loadLeads() {
 
 updateLeadStatus(id: number, event: Event) {
     const status = (event.target as HTMLSelectElement).value;
-    this.http.patch(`${API}/leads/${id}/status?status=${status}`, {}, 
+    this.http.patch(`${API}/leads/${id}/status?status=${status}`, {},
                     { responseType: 'text' })
         .subscribe({
             next: () => {
@@ -538,7 +519,7 @@ updateLeadStatus(id: number, event: Event) {
         });
 }
 
-// ── Analytics Charts ──
+
 loadCharts() {
     if (this.statusChart)         { this.statusChart.destroy();         this.statusChart = null;         }
     if (this.courseChart)         { this.courseChart.destroy();         this.courseChart = null;         }
@@ -628,20 +609,20 @@ renderStatusChart(data: any) {
     type: 'doughnut',
     data: {
       labels: Object.keys(data),
-      datasets: [{ 
-        data: Object.values<number>(data), 
-        backgroundColor: ['#EF9F27','#1D9E75','#D85A30'], 
-        borderWidth: 0 
+      datasets: [{
+        data: Object.values<number>(data),
+        backgroundColor: ['#EF9F27','#1D9E75','#D85A30'],
+        borderWidth: 0
       }]
     },
     options: {
       maintainAspectRatio: false,
       cutout: '65%',
-      plugins: { 
-        legend: { 
+      plugins: {
+        legend: {
           position: 'right',           // ← change from 'bottom' to 'right'
           labels: { font: { size: 11 }, boxWidth: 10 }
-        } 
+        }
       }
     }
   });
@@ -675,24 +656,23 @@ renderCourseChart(data: any) {
     type: 'doughnut',
     data: {
       labels: Object.keys(truncated),
-      datasets: [{ 
-        data: Object.values<number>(truncated), 
-        backgroundColor: ['#7F77DD','#378ADD','#5DCAA5','#D85A30','#EF9F27','#D4537E'], 
-        borderWidth: 0 
+      datasets: [{
+        data: Object.values<number>(truncated),
+        backgroundColor: ['#7F77DD','#378ADD','#5DCAA5','#D85A30','#EF9F27','#D4537E'],
+        borderWidth: 0
       }]
     },
     options: {
       maintainAspectRatio: false,
-      cutout: '65%',                  
-      plugins: { 
-        legend: { 
-          position: 'right',          
-          labels: { 
-            font: { size: 11 }, 
+      cutout: '65%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            font: { size: 11 },
             boxWidth: 10
-            // ← generateLabels removed
-          } 
-        } 
+          }
+        }
       }
     }
   });
@@ -709,24 +689,23 @@ renderFaqChart(data: any) {
     type: 'doughnut',
     data: {
       labels: Object.keys(truncated),
-      datasets: [{ 
-        data: Object.values<number>(truncated), 
-        backgroundColor: ['#378ADD','#1D9E75','#EF9F27','#D85A30','#7F77DD'], 
-        borderWidth: 0 
+      datasets: [{
+        data: Object.values<number>(truncated),
+        backgroundColor: ['#378ADD','#1D9E75','#EF9F27','#D85A30','#7F77DD'],
+        borderWidth: 0
       }]
     },
     options: {
       maintainAspectRatio: false,
       cutout: '65%',
-      plugins: { 
-        legend: { 
-          position: 'right', 
-          labels: { 
-            font: { size: 11 }, 
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            font: { size: 11 },
             boxWidth: 10
-            // ← generateLabels removed
-          } 
-        } 
+          }
+        }
       }
     }
   });
@@ -775,10 +754,6 @@ renderTimeChart(data: any) {
   });
 }
 
-
-  // ══════════════════════════════════════════
-  // MODAL HELPERS
-  // ══════════════════════════════════════════
   openModal(type: string) {
     this.modal = type;
     this.editingId = null;
@@ -786,7 +761,7 @@ renderTimeChart(data: any) {
     this.modalError = '';
     this.modalLoading = false;
 
-    // reset forms
+
     this.courseForm = { isActive: true };
     this.faqForm = { isActive: true };
     this.intentForm = { intentName: '', keywords: '', actionType: '', responseTemplate: '', status: true };
