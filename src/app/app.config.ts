@@ -13,6 +13,15 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([jwtInterceptor])),
     provideAnimations(),
-    importProvidersFrom(ToastrModule.forRoot())
+
+    importProvidersFrom(
+      ToastrModule.forRoot({
+        positionClass: 'toast-top-right',
+        timeOut: 3000,
+        closeButton: true,
+        progressBar: true,
+        preventDuplicates: true
+      })
+    )
   ]
 };

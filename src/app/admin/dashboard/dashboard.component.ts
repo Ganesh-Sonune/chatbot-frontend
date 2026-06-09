@@ -5,8 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';              // fixes forkJoin error
-import { Chart, registerables } from 'chart.js';          // fixes Chart error
+import { catchError } from 'rxjs/operators';
+import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 
@@ -58,6 +58,7 @@ export class DashboardComponent implements OnInit {
       config: 'Bot Config',
       leads: 'Leads',
       referrals: 'Referrals',
+      admins: 'Admin Management',
     };
     return titles[this.activeTab] ?? 'Dashboard';
   }
@@ -66,11 +67,35 @@ export class DashboardComponent implements OnInit {
   stats = { courses: 0, faqs: 0, intents: 0, trainers: 0 ,leads: 0 };
 
 
+  admins: any[] = [];
+
+  adminForm = {
+    username: '',
+    password: ''
+  };
+
+
   courses: any[] = [];
   coursePage = 0;
   courseTotalPages = 1;
   courseFilter = { name: '', mode: '', isActive: '' };
-  courseForm: any = {};
+ courseForm: any = {
+   name: '',
+   duration: '',
+   skills: '',
+   mode: '',
+   highlights: '',
+   status: true,
+
+   batchTiming: '',
+   nextBatchDate: '',
+   brochureUrl: '',
+
+   placementSupport: '',
+   placementPercentage: '',
+   highestPackage: '',
+   hiringCompanies: '',
+ };
 
 
   faqs: any[] = [];
@@ -120,6 +145,7 @@ referralFilter = { referrerPhone: '', referredPhone: '', status: '' };
 
   ngOnInit() {
     this.loadStats();
+    this.loadAdmins();
     setTimeout(() => this.loadCharts(), 200);
   }
 
@@ -173,6 +199,58 @@ loadStats() {
 }
 
 
+  loadAdmins() {
+    this.http.get<any>(`${API}/admin/list`).subscribe({
+      next: (res) => {
+        this.admins = res?.data ?? res ?? [];
+        console.log("ADMINS:", this.admins);
+      },
+      error: (err) => console.error(err)
+    });
+  }
+
+  addAdmin() {
+    if (!this.adminForm.username || !this.adminForm.password) {
+      this.showToast('Enter username & password', 'error');
+      return;
+    }
+
+    const payload = {
+      username: this.adminForm.username,
+      password: this.adminForm.password,
+      role: 'ROLE_ADMIN',
+      enabled: true
+    };
+
+    this.http.post(`${API}/admin/add`, payload)
+      .subscribe({
+        next: () => {
+          this.showToast('Admin added!');
+          this.adminForm = { username: '', password: '' };
+          this.loadAdmins();
+        },
+        error: (err) => {
+          console.log("ADMIN ERROR:", err);
+          this.showToast(
+            err?.error?.message || 'Failed to add admin',
+            'error'
+          );
+        }
+      });
+  }
+
+  toggleAdmin(id: number) {
+    this.http.post(`${API}/admin/toggle/${id}`, {})
+      .subscribe({
+        next: () => {
+          this.showToast('Admin updated');
+          this.loadAdmins();
+        },
+        error: () => this.showToast('Error updating admin', 'error')
+      });
+  }
+
+
   loadCourses() {
     let url = `${API}/courses?page=${this.coursePage}&size=8`;
     if (this.courseFilter.name) url += `&name=${this.courseFilter.name}`;
@@ -184,6 +262,8 @@ loadStats() {
       this.courseTotalPages =1;
     });
   }
+
+
 
   editCourse(c: any) {
     this.editingId = c.id;
@@ -620,7 +700,7 @@ renderStatusChart(data: any) {
       cutout: '65%',
       plugins: {
         legend: {
-          position: 'right',           // ← change from 'bottom' to 'right'
+          position: 'right',
           labels: { font: { size: 11 }, boxWidth: 10 }
         }
       }
@@ -762,7 +842,18 @@ renderTimeChart(data: any) {
     this.modalLoading = false;
 
 
-    this.courseForm = { isActive: true };
+    this.courseForm = {
+      isActive: true,
+
+      batchTiming: '',
+      nextBatchDate: '',
+      brochureUrl: '',
+
+      placementSupport: '',
+      placementPercentage: '',
+      highestPackage: '',
+      hiringCompanies: '',
+    };
     this.faqForm = { isActive: true };
     this.intentForm = { intentName: '', keywords: '', actionType: '', responseTemplate: '', status: true };
     this.trainerForm = {};

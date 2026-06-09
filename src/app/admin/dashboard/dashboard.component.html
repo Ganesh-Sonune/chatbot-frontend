@@ -1,8 +1,3 @@
-
-
-
-
-
 <div class="admin-shell">
 
 
@@ -22,10 +17,15 @@
                 <span class="nav-icon">📊</span>
                 <span class="nav-label">Dashboard</span>
             </button>
+
+<!--          <button (click)="setTab('admins')">-->
+<!--            Admins-->
+<!--          </button>-->
             <button class="nav-item" [class.active]="activeTab === 'courses'" (click)="setTab('courses')">
                 <span class="nav-icon">📚</span>
                 <span class="nav-label">Courses</span>
             </button>
+
             <button class="nav-item" [class.active]="activeTab === 'faqs'" (click)="setTab('faqs')">
                 <span class="nav-icon">❓</span>
                 <span class="nav-label">FAQs</span>
@@ -42,6 +42,15 @@
                 <span class="nav-icon">🤝</span>
                 <span class="nav-label">Referrals</span>
             </button>
+
+          <button class="nav-item"
+                  [class.active]="activeTab === 'admins'"
+                  (click)="setTab('admins')">
+
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">Admins</span>
+
+          </button>
             <button class="nav-item" [class.active]="activeTab === 'config'" (click)="setTab('config')">
                 <span class="nav-icon">⚙️</span>
                 <span class="nav-label">Bot Config</span>
@@ -424,8 +433,71 @@
             </div>
         </div>
 
+      <div *ngIf="activeTab === 'admins'" class="tab-content">
 
-        <div *ngIf="activeTab === 'config'" class="tab-content">
+        <div class="toolbar">
+          <span class="toolbar-label">Admin Management</span>
+        </div>
+
+        <!-- Add Admin Form -->
+        <div class="card" style="margin-bottom:15px; padding:15px;">
+
+          <input class="form-input"
+                 [(ngModel)]="adminForm.username"
+                 placeholder="Username">
+
+          <input class="form-input"
+                 [(ngModel)]="adminForm.password"
+                 type="password"
+                 placeholder="Password">
+
+          <button class="btn-primary" (click)="addAdmin()">
+            Create Admin
+          </button>
+
+        </div>
+
+        <!-- Admin List -->
+        <div class="table-wrap">
+
+          <table class="data-table">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr *ngFor="let a of admins">
+              <td>{{ a.id }}</td>
+              <td>{{ a.username }}</td>
+              <td>
+                        <span class="badge"
+                              [class.badge-active]="a.enabled"
+                              [class.badge-inactive]="!a.enabled">
+                            {{ a.enabled ? 'ACTIVE' : 'DISABLED' }}
+                        </span>
+              </td>
+              <td>
+                <button class="btn-icon"
+                        (click)="toggleAdmin(a.id)">
+                  🔄
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+
+
+      <div *ngIf="activeTab === 'config'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
                     <input class="search-input" [(ngModel)]="configFilter.key" placeholder="Filter by key…"
@@ -677,6 +749,40 @@
               [(ngModel)]="courseForm.brochureUrl"
               placeholder="https://example.com/java-brochure.pdf" />
           </div>
+
+          <div class="form-row">
+            <label>Placement Support</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.placementSupport"
+              placeholder="Yes / No" />
+          </div>
+
+          <div class="form-row">
+            <label>Placement Percentage</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.placementPercentage"
+              placeholder="e.g. 85%" />
+          </div>
+
+          <div class="form-row">
+            <label>Highest Package</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.highestPackage"
+              placeholder="e.g. 8 LPA" />
+          </div>
+
+          <div class="form-row">
+            <label>Hiring Companies</label>
+            <textarea
+              class="form-input"
+              rows="3"
+              [(ngModel)]="courseForm.hiringCompanies"
+              placeholder="TCS, Infosys, Wipro, Accenture">
+            </textarea>
+          </div>
             <div class="form-row toggle-row">
                 <label>Active</label>
                 <input type="checkbox" [(ngModel)]="courseForm.isActive" />
@@ -839,6 +945,7 @@
         </div>
     </div>
 </div>
+
 
 
 <div class="toast" *ngIf="toast" [class.toast-error]="toastType === 'error'">

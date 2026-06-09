@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
-// ── Variables (matches your existing theme) ──
 $green-dark:   #1b5e20;
 $green-mid:    #2e7d32;
 $green-bright: #4caf50;
@@ -13,11 +12,10 @@ $text-light:   #6b7c6b;
 $shadow:       0 4px 24px rgba(0, 0, 0, 0.08);
 $danger:       #c62828;
 $danger-light: #ffebee;
-$sidebar-bg: #1e293b;   // ADD this new line
+$sidebar-bg: #1e293b;
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-// ── Shell Layout ──
 .admin-shell {
   display: flex;
   height: 100vh;
@@ -26,7 +24,6 @@ $sidebar-bg: #1e293b;   // ADD this new line
   overflow: hidden;
 }
 
-// ── Sidebar ──
 .sidebar {
   width: 220px;
   min-width: 220px;
@@ -144,7 +141,6 @@ $sidebar-bg: #1e293b;   // ADD this new line
   &:hover { background: rgba(255,0,0,0.1); color: #ff8a80; }
 }
 
-// ── Main Content ──
 .main-content {
   flex: 1;
   display: flex;
@@ -185,7 +181,6 @@ $sidebar-bg: #1e293b;   // ADD this new line
   padding: 24px 28px;
 }
 
-// ── Stats Grid ──
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -227,7 +222,6 @@ $sidebar-bg: #1e293b;   // ADD this new line
   font-weight: 500;
 }
 
-// ── Quick Actions ──
 .section-title {
   font-size: 15px;
   font-weight: 700;
@@ -263,7 +257,6 @@ $sidebar-bg: #1e293b;   // ADD this new line
   }
 }
 
-// ── Toolbar ──
 .toolbar {
   display: flex;
   align-items: center;
@@ -308,7 +301,6 @@ $sidebar-bg: #1e293b;   // ADD this new line
   cursor: pointer;
 }
 
-// ── Buttons ──
 .btn-primary {
   padding: 8px 18px;
   background: linear-gradient(135deg, $green-bright, $green-mid);
@@ -361,7 +353,6 @@ $sidebar-bg: #1e293b;   // ADD this new line
   }
 }
 
-// ── Table ──
 .table-wrap {
   background: $white;
   border: 1px solid $border;
@@ -416,7 +407,6 @@ $sidebar-bg: #1e293b;   // ADD this new line
   padding: 32px !important;
 }
 
-// ── Badges ──
 .badge {
   display: inline-block;
   padding: 3px 10px;
@@ -446,7 +436,6 @@ $sidebar-bg: #1e293b;   // ADD this new line
   border-color: #bbdefb;
 }
 
-// ── Pagination ──
 .pagination {
   display: flex;
   align-items: center;
@@ -476,7 +465,6 @@ $sidebar-bg: #1e293b;   // ADD this new line
 
 .page-info { font-size: 13px; color: $text-light; font-weight: 500; }
 
-// ── Modals ──
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -604,7 +592,7 @@ $sidebar-bg: #1e293b;   // ADD this new line
   border-top: 1px solid $border;
 }
 
-// ── Config Key ──
+
 code.cfg-key {
   background: $green-pale;
   border: 1px solid $border;
@@ -615,11 +603,15 @@ code.cfg-key {
   font-family: 'Courier New', monospace;
 }
 
-// ── Toast ──
 .toast {
   position: fixed;
-  bottom: 24px;
+
+  top: 24px;
   right: 24px;
+
+  bottom: auto;
+  left: auto;
+
   background: $green-dark;
   color: $white;
   padding: 12px 20px;
@@ -630,9 +622,11 @@ code.cfg-key {
   z-index: 2000;
   animation: slideUp 0.2s ease;
 
-  &.toast-error { background: $danger; }
+  &.toast-error {
+    background: $danger;
+  }
 }
-  // ── Charts ──
+
 .charts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -661,7 +655,7 @@ code.cfg-key {
 
 .chart-wrap {
   position: relative;
-  height: 200px;     // fixed height — this is the key fix
+  height: 200px;
 
   canvas {
     max-height: 220px !important;
@@ -676,9 +670,39 @@ code.cfg-key {
   }
 }
 
+.action-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
 
-// ── Scrollbar ──
+.btn-icon:hover {
+  transform: scale(1.1);
+}
+
+.btn-icon.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.btn-icon.danger {
+  background: #ffebee;
+  color: #c62828;
+}
+
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #b2dfb2; border-radius: 4px; }
