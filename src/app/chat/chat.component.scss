@@ -159,7 +159,7 @@ $shadow:       0 4px 24px rgba(0, 0, 0, 0.10);
     opacity: 0.85;
   }
 
-  // bullet — Jio style: left-padding + small CSS dot, no inline icon
+
   .msg-bullet {
     font-size: 13px;
     line-height: 1.55;
@@ -465,4 +465,125 @@ $shadow:       0 4px 24px rgba(0, 0, 0, 0.10);
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+.premium-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+  transition: 0.25s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 35px rgba(0,0,0,0.12);
+  }
+}
+
+/* HEADER */
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.course-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.course-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.course-tag {
+  background: #e8f5e9;
+  color: #1b5e20;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* GRID */
+.course-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.info-box {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background: #f9fafb;
+  border-radius: 12px;
+  align-items: center;
+}
+
+.info-box .icon {
+  font-size: 18px;
+}
+
+.label {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* HIGHLIGHT */
+.highlight-box {
+  background: #fff7ed;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin: 10px 0;
+  color: #c2410c;
+}
+
+/* SECTION TITLES */
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  margin: 10px 0 6px;
+}
+
+/* BATCH */
+.batch-grid, .placement-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.batch-item, .placement-item {
+  background: #f3f4f6;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #111827;
+}
+
+/* FOOTER */
+.course-footer-premium {
+  margin-top: 12px;
+  text-align: center;
+  padding: 10px;
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
 }
