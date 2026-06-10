@@ -365,13 +365,25 @@
                     </tbody>
                 </table>
             </div>
-            <div class="pagination">
-                <button class="page-btn" [disabled]="intentPage === 0"
-                    (click)="intentPage = intentPage - 1; loadIntents()">‹</button>
-                <span class="page-info">Page {{ intentPage + 1 }} of {{ intentTotalPages }}</span>
-                <button class="page-btn" [disabled]="intentPage >= intentTotalPages - 1"
-                    (click)="intentPage = intentPage + 1; loadIntents()">›</button>
-            </div>
+          <div class="pagination">
+
+            <button class="page-btn"
+                    [disabled]="intentPage === 0"
+                    (click)="intentPage = intentPage - 1; loadIntents()">
+              ‹
+            </button>
+
+            <span class="page-info">
+    Page {{ intentPage + 1 }} of {{ intentTotalPages }}
+  </span>
+
+            <button class="page-btn"
+                    [disabled]="intentPage >= intentTotalPages - 1"
+                    (click)="intentPage = intentPage + 1; loadIntents()">
+              ›
+            </button>
+
+          </div>
         </div>
 
 

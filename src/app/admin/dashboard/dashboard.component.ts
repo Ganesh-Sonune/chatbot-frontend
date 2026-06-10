@@ -29,6 +29,21 @@ const API = 'http://localhost:3000/api';
 export class DashboardComponent implements OnInit {
 
 
+  nextIntentPage() {
+    if (this.intentPage < this.intentTotalPages - 1) {
+      this.intentPage++;
+      this.loadIntents();
+    }
+  }
+
+  prevIntentPage() {
+    if (this.intentPage > 0) {
+      this.intentPage--;
+      this.loadIntents();
+    }
+  }
+
+
   sidebarCollapsed = false;
   activeTab = 'dashboard';
   modal: string | null = null;
@@ -161,7 +176,13 @@ referralFilter = { referrerPhone: '', referredPhone: '', status: '' };
     if (tab === 'leads') this.loadLeads();
     if (tab === 'referrals') this.loadReferrals();
     if (tab === 'dashboard') setTimeout(() => this.loadCharts(), 100);
+    if (tab === 'intents') {
+        this.intentPage = 0;
+        this.loadIntents();
+      }
   }
+
+
 
   logout() {
     this.auth.logout();
@@ -370,14 +391,26 @@ toggleFaqStatus(f: any) {
       });
   }
 
+loadIntents() {
+  this.http.get<any>(
+    `${API}/intents?page=${this.intentPage}&size=8`
+  ).subscribe({
+    next: (res) => {
 
-  loadIntents() {
-    this.http.get<any>(`${API}/intents?page=${this.intentPage}&size=8`).subscribe(res => {
-      this.intents = res ?? [];
-      this.intentTotalPages =  1;
-    });
-  }
+      console.log("INTENT RESPONSE:", res);
 
+
+      this.stats.intents = res.total ?? 0;
+      this.intents = res.data || [];
+
+      this.intentTotalPages = res.totalPages || 1;
+    },
+    error: (err) => {
+      console.error("Intent API error:", err);
+      this.intents = [];
+    }
+  });
+}
 editIntent(i: any) {
   this.editingId = i.id;
   this.intentForm = {
