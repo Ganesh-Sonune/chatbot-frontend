@@ -29,10 +29,12 @@ const API = 'http://localhost:3000/api';
 export class DashboardComponent implements OnInit {
 
 
+
   nextIntentPage() {
     if (this.intentPage < this.intentTotalPages - 1) {
       this.intentPage++;
       this.loadIntents();
+
     }
   }
 
@@ -113,6 +115,7 @@ export class DashboardComponent implements OnInit {
  };
 
 
+  faqTotal: number = 0;
   faqs: any[] = [];
   faqPage = 0;
   faqTotalPages = 1;
@@ -161,6 +164,8 @@ referralFilter = { referrerPhone: '', referredPhone: '', status: '' };
   ngOnInit() {
     this.loadStats();
     this.loadAdmins();
+    this.loadIntents();
+    this.loadFaqs();
     setTimeout(() => this.loadCharts(), 200);
   }
 
@@ -335,17 +340,29 @@ error:()=>this.showToast('Failed to toggle status.','error')
   }
 
 
-  loadFaqs() {
-    let url = `${API}/faqs?page=${this.faqPage}&size=8`;
-    if (this.faqFilter.question) url += `&question=${this.faqFilter.question}`;
-    if (this.faqFilter.isActive !== '') url += `&isActive=${this.faqFilter.isActive}`;
+loadFaqs() {
+  this.http.get<any>(
+    `${API}/faqs?page=${this.faqPage}&size=8`
+  ).subscribe({
+    next: (res) => {
 
-    this.http.get<any>(url).subscribe(res => {
-      this.faqs = res ?? [];
+      console.log("FAQ RESPONSE:", res);
 
-      this.faqTotalPages =  1;
-    });
-  }
+
+      this.stats.faqs = res.total || 0;
+
+      this.faqs = res.data ?? res ?? [];
+
+      this.faqTotal = res.total ?? this.faqs.length ?? 0;
+      this.faqTotalPages = res.totalPages ?? 1;
+
+    },
+    error: (err) => {
+      console.error("FAQ API error:", err);
+      this.faqs = [];
+    }
+  });
+}
 
   editFaq(f: any) {
     this.editingId = f.id;
@@ -400,7 +417,7 @@ loadIntents() {
       console.log("INTENT RESPONSE:", res);
 
 
-      this.stats.intents = res.total ?? 0;
+       this.stats.intents = res.total || 0;
       this.intents = res.data || [];
 
       this.intentTotalPages = res.totalPages || 1;
@@ -411,6 +428,8 @@ loadIntents() {
     }
   });
 }
+
+
 editIntent(i: any) {
   this.editingId = i.id;
   this.intentForm = {
