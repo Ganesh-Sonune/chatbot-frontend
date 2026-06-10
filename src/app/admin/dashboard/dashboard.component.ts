@@ -515,21 +515,26 @@ updateReferralStatus(id: number, event: Event) {
 }
 
 
-loadTrainers(){
-let url=`${API}/trainers?page=${this.trainerPage}&size=8`;
+loadTrainers() {
+  let url = `${API}/trainers?page=${this.trainerPage}&size=8`;
 
-if(this.trainerFilter.name){
-url+=`&name=${this.trainerFilter.name}`;
-}
+  if (this.trainerFilter.name) {
+    url += `&name=${this.trainerFilter.name}`;
+  }
 
-if(this.trainerFilter.specialization){
-url+=`&specialization=${this.trainerFilter.specialization}`;
-}
+  if (this.trainerFilter.specialization) {
+    url += `&specialization=${this.trainerFilter.specialization}`;
+  }
 
-this.http.get<any>(url).subscribe(res=>{
-this.trainers=res.data??[];
-this.trainerTotalPages=1;
-},);
+  this.http.get<any>(url).subscribe(res => {
+
+    console.log("TRAINER RESPONSE:", res);
+
+    this.trainers = res.data ?? res ?? [];
+
+
+    this.trainerTotalPages = res.totalPages ?? 1;
+  });
 }
 
   editTrainer(t: any) {
