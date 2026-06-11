@@ -153,6 +153,7 @@ leadFilter = { phone: '', status: '', requestType: '' };
 
 referrals: any[] = [];
 referralPage = 0;
+referralTotal: number = 0;
 referralTotalPages = 1;
 referralFilter = { referrerPhone: '', referredPhone: '', status: '' };
 
@@ -166,8 +167,10 @@ referralFilter = { referrerPhone: '', referredPhone: '', status: '' };
     this.loadStats();
     this.loadAdmins();
     this.loadIntents();
+    this.loadTrainers();
     this.loadFaqs();
     this.loadCourses();
+    this.loadReferrals();
     setTimeout(() => this.loadCharts(), 200);
   }
 
@@ -511,15 +514,33 @@ editIntent(i: any) {
 
 
 loadReferrals() {
-    let url = `${API}/referrals?page=${this.referralPage}&size=10`;
-    if (this.referralFilter.referrerPhone) url += `&referrerPhone=${this.referralFilter.referrerPhone}`;
-    if (this.referralFilter.referredPhone) url += `&referredPhone=${this.referralFilter.referredPhone}`;
-    if (this.referralFilter.status)        url += `&status=${this.referralFilter.status}`;
+  let url = `${API}/referrals?page=${this.referralPage}&size=10`;
 
-    this.http.get<any>(url).subscribe(res => {
-        this.referrals = res ?? [];
-        this.referralTotalPages = 1;
-    });
+  if (this.referralFilter.referrerPhone)
+    url += `&referrerPhone=${this.referralFilter.referrerPhone}`;
+
+  if (this.referralFilter.referredPhone)
+    url += `&referredPhone=${this.referralFilter.referredPhone}`;
+
+  if (this.referralFilter.status)
+    url += `&status=${this.referralFilter.status}`;
+
+  this.http.get<any>(url).subscribe({
+    next: (res) => {
+
+      console.log("REFERRAL RESPONSE:", res);
+
+      this.referrals = res.data ?? [];
+      this.referralTotalPages = res.totalPages ?? 1;
+      this.referralTotal = res.total ?? 0;
+
+    },
+    error: (err) => {
+      console.error("Referral API error:", err);
+      this.referrals = [];
+      this.referralTotalPages = 1;
+    }
+  });
 }
 
 updateReferralStatus(id: number, event: Event) {
