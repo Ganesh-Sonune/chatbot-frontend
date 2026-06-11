@@ -94,6 +94,7 @@ export class DashboardComponent implements OnInit {
 
   courses: any[] = [];
   coursePage = 0;
+  courseTotal: number = 0;
   courseTotalPages = 1;
   courseFilter = { name: '', mode: '', isActive: '' };
  courseForm: any = {
@@ -166,6 +167,7 @@ referralFilter = { referrerPhone: '', referredPhone: '', status: '' };
     this.loadAdmins();
     this.loadIntents();
     this.loadFaqs();
+    this.loadCourses();
     setTimeout(() => this.loadCharts(), 200);
   }
 
@@ -277,17 +279,36 @@ loadStats() {
   }
 
 
-  loadCourses() {
-    let url = `${API}/courses?page=${this.coursePage}&size=8`;
-    if (this.courseFilter.name) url += `&name=${this.courseFilter.name}`;
-    if (this.courseFilter.mode) url += `&mode=${this.courseFilter.mode}`;
-    if (this.courseFilter.isActive !== '') url += `&isActive=${this.courseFilter.isActive}`;
+ loadCourses() {
+   let url = `${API}/courses?page=${this.coursePage}&size=8`;
 
-    this.http.get<any>(url).subscribe(res => {
-      this.courses = res ?? [];
-      this.courseTotalPages =1;
-    });
-  }
+   if (this.courseFilter.name)
+     url += `&name=${this.courseFilter.name}`;
+
+   if (this.courseFilter.mode)
+     url += `&mode=${this.courseFilter.mode}`;
+
+   if (this.courseFilter.isActive !== '')
+     url += `&isActive=${this.courseFilter.isActive}`;
+
+   this.http.get<any>(url).subscribe({
+     next: (res) => {
+
+       console.log("COURSE RESPONSE:", res);
+
+       this.stats.courses = res.total || 0;
+       this.courses = res.data ?? [];
+       this.courseTotalPages = res.totalPages ?? 1;
+       this.courseTotal = res.total ?? 0;
+
+     },
+     error: (err) => {
+       console.error("Course API error:", err);
+       this.courses = [];
+       this.courseTotalPages = 1;
+     }
+   });
+ }
 
 
 
