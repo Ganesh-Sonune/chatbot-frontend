@@ -7,27 +7,121 @@
   </div>
 
   <div class="chat-box" #chatBox>
+
     <div *ngFor="let msg of messages" class="message-group">
 
       <div *ngIf="msg.type === 'user'" class="user-msg-wrapper">
         <div class="user-msg">{{ msg.text }}</div>
       </div>
 
-      <div *ngIf="msg.type === 'bot'" class="bot-msg-wrapper">
+      <div *ngIf="msg.type === 'bot' && !msg.isCourseCard" class="bot-msg-wrapper">
+
         <div class="bot-avatar">CD</div>
-        <div class="bot-msg" [innerHTML]="formatMessage(msg.text)"></div>
+
+        <div class="bot-msg"
+             [innerHTML]="formatMessage(msg.text)">
+        </div>
+
       </div>
 
-      <div *ngIf="msg.options && msg.options.length && !msg.optionsUsed" class="options-box">
+      <div *ngIf="msg.type === 'bot' && msg.isCourseCard" class="bot-msg-wrapper">
+
+        <div class="bot-avatar">CD</div>
+
+        <div class="course-card-wrapper">
+
+          <div class="course-header">
+            🚀 Explore Our Popular Courses
+          </div>
+
+          <div class="premium-card" *ngFor="let course of msg.courses">
+
+            <div class="course-title">
+              🎓 {{ course.name }}
+            </div>
+
+            <div class="course-grid">
+
+              <div class="info-box">
+                ⏱ Duration: {{ course.duration }}
+              </div>
+
+              <div class="info-box">
+                🛠 Skills: {{ course.skills }}
+              </div>
+
+              <div class="info-box" *ngIf="course.mode">
+                💻 Mode: {{ course.mode }}
+              </div>
+
+            </div>
+
+            <div class="highlight-box" *ngIf="course.highlights">
+              ✨ {{ course.highlights }}
+            </div>
+
+
+            <div class="batch-section"
+                 *ngIf="course.batchTiming || course.nextBatchDate">
+
+              <div *ngIf="course.batchTiming">
+                🕒 {{ course.batchTiming }}
+              </div>
+
+              <div *ngIf="course.nextBatchDate">
+                📅 Next Batch: {{ course.nextBatchDate }}
+              </div>
+
+            </div>
+
+
+            <div class="placement-section"
+                 *ngIf="course.placementSupport || course.placementPercentage">
+
+              <div *ngIf="course.placementSupport">
+                ✔ {{ course.placementSupport }}
+              </div>
+
+              <div *ngIf="course.placementPercentage">
+                📊 {{ course.placementPercentage }}
+              </div>
+
+              <div *ngIf="course.highestPackage">
+                💰 {{ course.highestPackage }}
+              </div>
+
+              <div *ngIf="course.hiringCompanies">
+                🏢 {{ course.hiringCompanies }}
+              </div>
+
+            </div>
+
+
+            <div class="course-footer-premium">
+              🚀 Start your career journey with CodeDisha
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div *ngIf="msg.options && msg.options.length && !msg.optionsUsed"
+           class="options-box">
+
         <button
           *ngFor="let opt of msg.options"
           class="option-btn"
           (click)="selectOption(msg, opt)">
           {{ opt }}
         </button>
+
       </div>
 
     </div>
+
 
     <div *ngIf="isTyping" class="bot-msg-wrapper">
       <div class="bot-avatar">CD</div>
@@ -38,6 +132,7 @@
 
   </div>
 
+
   <div class="input-box">
     <input
       [(ngModel)]="userInput"
@@ -45,11 +140,14 @@
       placeholder="Ask about courses, placements..."
       (keyup.enter)="sendMessage()"
     />
+
     <button (click)="sendMessage()" [disabled]="wordCount > 100 || isTyping">
       Send
     </button>
   </div>
 
-  <p *ngIf="wordCount > 100" class="error-text">Max 100 words allowed</p>
+  <p *ngIf="wordCount > 100" class="error-text">
+    Max 100 words allowed
+  </p>
 
 </div>

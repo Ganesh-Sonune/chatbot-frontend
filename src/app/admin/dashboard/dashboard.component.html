@@ -1,11 +1,6 @@
-
-
-
-
-
 <div class="admin-shell">
 
-    <!-- ═══ SIDEBAR ═══ -->
+
     <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
         <div class="sidebar-header">
             <div class="brand">
@@ -22,10 +17,15 @@
                 <span class="nav-icon">📊</span>
                 <span class="nav-label">Dashboard</span>
             </button>
+
+<!--          <button (click)="setTab('admins')">-->
+<!--            Admins-->
+<!--          </button>-->
             <button class="nav-item" [class.active]="activeTab === 'courses'" (click)="setTab('courses')">
                 <span class="nav-icon">📚</span>
                 <span class="nav-label">Courses</span>
             </button>
+
             <button class="nav-item" [class.active]="activeTab === 'faqs'" (click)="setTab('faqs')">
                 <span class="nav-icon">❓</span>
                 <span class="nav-label">FAQs</span>
@@ -42,6 +42,15 @@
                 <span class="nav-icon">🤝</span>
                 <span class="nav-label">Referrals</span>
             </button>
+
+          <button class="nav-item"
+                  [class.active]="activeTab === 'admins'"
+                  (click)="setTab('admins')">
+
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">Admins</span>
+
+          </button>
             <button class="nav-item" [class.active]="activeTab === 'config'" (click)="setTab('config')">
                 <span class="nav-icon">⚙️</span>
                 <span class="nav-label">Bot Config</span>
@@ -60,10 +69,10 @@
         </div>
     </aside>
 
-    <!-- ═══ MAIN CONTENT ═══ -->
+
     <main class="main-content">
 
-        <!-- Top bar -->
+
         <div class="topbar">
             <h1 class="page-title">{{ pageTitle }}</h1>
             <div class="topbar-right">
@@ -71,7 +80,7 @@
             </div>
         </div>
 
-        <!-- ── DASHBOARD TAB ── -->
+
         <div *ngIf="activeTab === 'dashboard'" class="tab-content">
 
             <div class="stats-grid">
@@ -130,7 +139,6 @@
                 </div>
             </div>
 
-            <!-- Replace your charts-grid div with this -->
             <div class="charts-grid">
                 <div class="chart-card">
                     <h4 class="chart-title">Leads by Status</h4>
@@ -185,7 +193,7 @@
             </div>
         </div>
 
-        <!-- ── COURSES TAB ── -->
+
         <div *ngIf="activeTab === 'courses'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
@@ -255,7 +263,7 @@
             </div>
         </div>
 
-        <!-- ── FAQS TAB ── -->
+
         <div *ngIf="activeTab === 'faqs'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
@@ -313,10 +321,10 @@
             </div>
         </div>
 
-        <!-- ── INTENTS TAB ── -->
+
         <div *ngIf="activeTab === 'intents'" class="tab-content">
             <div class="toolbar">
-                <span class="toolbar-label">All Intents ({{ intents.length }})</span>
+                <span class="toolbar-label">All Intents ({{ stats.intents }})</span>
                 <button class="btn-primary" (click)="openModal('intent')">+ Add Intent</button>
             </div>
 
@@ -357,16 +365,28 @@
                     </tbody>
                 </table>
             </div>
-            <div class="pagination">
-                <button class="page-btn" [disabled]="intentPage === 0"
-                    (click)="intentPage = intentPage - 1; loadIntents()">‹</button>
-                <span class="page-info">Page {{ intentPage + 1 }} of {{ intentTotalPages }}</span>
-                <button class="page-btn" [disabled]="intentPage >= intentTotalPages - 1"
-                    (click)="intentPage = intentPage + 1; loadIntents()">›</button>
-            </div>
+          <div class="pagination">
+
+            <button class="page-btn"
+                    [disabled]="intentPage === 0"
+                    (click)="intentPage = intentPage - 1; loadIntents()">
+              ‹
+            </button>
+
+            <span class="page-info">
+    Page {{ intentPage + 1 }} of {{ intentTotalPages }}
+  </span>
+
+            <button class="page-btn"
+                    [disabled]="intentPage >= intentTotalPages - 1"
+                    (click)="intentPage = intentPage + 1; loadIntents()">
+              ›
+            </button>
+
+          </div>
         </div>
 
-        <!-- ── TRAINERS TAB ── -->
+
         <div *ngIf="activeTab === 'trainers'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
@@ -425,8 +445,86 @@
             </div>
         </div>
 
-        <!-- ── BOT CONFIG TAB ── -->
-        <div *ngIf="activeTab === 'config'" class="tab-content">
+      <div *ngIf="activeTab === 'admins'" class="tab-content">
+
+        <div class="toolbar">
+          <span class="toolbar-label">Admin Management</span>
+        </div>
+
+        <!-- Add Admin Form -->
+        <div class="card" style="margin-bottom:15px; padding:15px;">
+
+          <input class="form-input"
+                 [(ngModel)]="adminForm.username"
+                 placeholder="Username">
+
+          <input class="form-input"
+                 [(ngModel)]="adminForm.password"
+                 type="password"
+                 placeholder="Password">
+
+          <button class="btn-primary" (click)="saveAdmin()">
+            Create Admin
+          </button>
+
+        </div>
+
+        <!-- Admin List -->
+        <div class="table-wrap">
+
+          <table class="data-table">
+            <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr *ngFor="let a of admins">
+              <td>{{ a.id }}</td>
+              <td>{{ a.username }}</td>
+              <td>
+                        <span class="badge"
+                              [class.badge-active]="a.enabled"
+                              [class.badge-inactive]="!a.enabled">
+                            {{ a.enabled ? 'ACTIVE' : 'DISABLED' }}
+                        </span>
+              </td>
+              <td class="actions">
+
+                <button class="btn-icon"
+                        title="Edit"
+                        (click)="editAdmin(a)">
+                  ✏️
+                </button>
+
+                <button class="btn-icon btn-toggle"
+                        title="Toggle Status"
+                        (click)="toggleAdmin(a.id)">
+                  🔄
+                </button>
+
+                <button class="btn-icon btn-del"
+                        title="Delete"
+                        (click)="deleteAdmin(a.id)">
+                  🗑️
+                </button>
+
+              </td>
+            </tr>
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+
+
+      <div *ngIf="activeTab === 'config'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
                     <input class="search-input" [(ngModel)]="configFilter.key" placeholder="Filter by key…"
@@ -469,7 +567,7 @@
             </div>
         </div>
 
-        <!-- ── LEADS TAB ── -->
+
         <div *ngIf="activeTab === 'leads'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
@@ -543,7 +641,7 @@
             </div>
         </div>
 
-        <!-- ── REFERRALS TAB ── -->
+
         <div *ngIf="activeTab === 'referrals'" class="tab-content">
             <div class="toolbar">
                 <div class="search-row">
@@ -612,14 +710,13 @@
                     (click)="referralPage = referralPage + 1; loadReferrals()">›</button>
             </div>
         </div>
-        
+
 
     </main>
 </div>
 
-<!-- ═══ MODALS ═══ -->
 
-<!-- Course Modal -->
+
 <div class="modal-overlay" *ngIf="modal === 'course'" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -655,6 +752,64 @@
                 <textarea class="form-input" rows="3" [(ngModel)]="courseForm.description"
                     placeholder="Course description…"></textarea>
             </div>
+
+          <div class="form-row">
+            <label>Batch Timing</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.batchTiming"
+              placeholder="e.g. Mon-Fri 7 PM - 9 PM" />
+          </div>
+
+          <div class="form-row">
+            <label>Next Batch Date</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.nextBatchDate"
+              placeholder="e.g. 15 June 2026" />
+          </div>
+
+          <div class="form-row">
+            <label>Brochure URL</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.brochureUrl"
+              placeholder="https://example.com/java-brochure.pdf" />
+          </div>
+
+          <div class="form-row">
+            <label>Placement Support</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.placementSupport"
+              placeholder="Yes / No" />
+          </div>
+
+          <div class="form-row">
+            <label>Placement Percentage</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.placementPercentage"
+              placeholder="e.g. 85%" />
+          </div>
+
+          <div class="form-row">
+            <label>Highest Package</label>
+            <input
+              class="form-input"
+              [(ngModel)]="courseForm.highestPackage"
+              placeholder="e.g. 8 LPA" />
+          </div>
+
+          <div class="form-row">
+            <label>Hiring Companies</label>
+            <textarea
+              class="form-input"
+              rows="3"
+              [(ngModel)]="courseForm.hiringCompanies"
+              placeholder="TCS, Infosys, Wipro, Accenture">
+            </textarea>
+          </div>
             <div class="form-row toggle-row">
                 <label>Active</label>
                 <input type="checkbox" [(ngModel)]="courseForm.isActive" />
@@ -670,7 +825,7 @@
     </div>
 </div>
 
-<!-- FAQ Modal -->
+
 <div class="modal-overlay" *ngIf="modal === 'faq'" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -703,7 +858,7 @@
 </div>
 
 
-<!-- Intent Modal -->
+
 <div class="modal-overlay" *ngIf="modal === 'intent'" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -746,7 +901,7 @@
     </div>
 </div>
 
-<!-- Trainer Modal -->
+
 <div class="modal-overlay" *ngIf="modal === 'trainer'" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -789,7 +944,7 @@
     </div>
 </div>
 
-<!-- Config Modal -->
+
 <div class="modal-overlay" *ngIf="modal === 'config'" (click)="closeModal()">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -818,7 +973,8 @@
     </div>
 </div>
 
-<!-- Toast -->
+
+
 <div class="toast" *ngIf="toast" [class.toast-error]="toastType === 'error'">
     {{ toast }}
 </div>

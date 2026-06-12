@@ -16,7 +16,14 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   @ViewChild('chatBox') chatBox!: ElementRef;
 
   userInput: string = '';
-  messages: any[] = [];
+  messages: {
+    text: string;
+    type: 'user' | 'bot';
+    options?: string[];
+    optionsUsed?: boolean;
+    isCourseCard?: boolean;
+    courses?: any[];
+  }[] = [];
   wordCount: number = 0;
   isTyping: boolean = false;
   useCodeDisha: boolean = true;
@@ -90,7 +97,10 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
   private scrollToBottom() {
     try {
-      this.chatBox.nativeElement.scrollTop = this.chatBox.nativeElement.scrollHeight;
+      this.chatBox.nativeElement.scrollTo({
+        top: this.chatBox.nativeElement.scrollHeight,
+        behavior: 'smooth'
+      });
     } catch (e) { }
   }
 
@@ -100,33 +110,61 @@ export class ChatComponent implements OnInit, AfterViewChecked {
   }
 
   sendMessage() {
+
     console.log('Sending sessionId:', this.sessionId);
+
     if (!this.userInput.trim() || this.isTyping) return;
 
     if (this.wordCount > 100) {
-      this.messages.push({ text: "Please ask a shorter question (max 100 words).", type: 'bot' });
+      this.messages.push({
+        text: "Please ask a shorter question (max 100 words).",
+        type: 'bot'
+      });
       return;
     }
 
     const message = this.userInput;
-    this.messages.push({ text: message, type: 'user' });
+
+    this.messages.push({
+      text: message,
+      type: 'user'
+    });
+
     this.userInput = '';
     this.wordCount = 0;
+
+
     this.isTyping = true;
 
-    this.http.post<any>('http://localhost:3000/api/chat', { message, sessionId: this.sessionId }).subscribe({
+    this.http.post<any>('http://localhost:3000/api/chat', {
+      message,
+      sessionId: this.sessionId
+    }).subscribe({
+
       next: (res) => {
+
         this.isTyping = false;
+
+        const botMessage = res?.message ?? 'Sorry, I could not understand that.';
+
         this.messages.push({
-          text: res.message,
+          text: botMessage,
           type: 'bot',
-          options: res.options || [],
+          options: res?.options ?? [],
           optionsUsed: false
         });
       },
-      error: () => {
+
+      error: (err) => {
+
         this.isTyping = false;
-        this.messages.push({ text: 'Server error. Please try again.', type: 'bot' });
+
+        this.messages.push({
+          text: '⚠️ Server error. Please try again later.',
+          type: 'bot'
+        });
+
+        console.error('Chat API error:', err);
       }
     });
   }

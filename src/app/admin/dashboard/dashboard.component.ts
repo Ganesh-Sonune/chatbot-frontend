@@ -4,15 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { forkJoin, of } from 'rxjs';                         
-import { catchError } from 'rxjs/operators';              // fixes forkJoin error
-import { Chart, registerables } from 'chart.js';          // fixes Chart error
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 
 
 
-Chart.register(...registerables); 
+Chart.register(...registerables);
 
 const API = 'http://localhost:3000/api';
 
@@ -28,7 +28,23 @@ const API = 'http://localhost:3000/api';
 
 export class DashboardComponent implements OnInit {
 
-  // ── Layout ──
+
+
+  nextIntentPage() {
+    if (this.intentPage < this.intentTotalPages - 1) {
+      this.intentPage++;
+      this.loadIntents();
+
+    }
+  }
+
+  prevIntentPage() {
+    if (this.intentPage > 0) {
+      this.intentPage--;
+      this.loadIntents();
+    }
+  }
+
   sidebarCollapsed = false;
   activeTab = 'dashboard';
   modal: string | null = null;
@@ -38,6 +54,7 @@ export class DashboardComponent implements OnInit {
   toastType: 'success' | 'error' = 'success';
   editingId: number | null = null;
   editingKey: string | null = null;
+//   editingAdminId: number | null = null;
 
   private statusChart: Chart | null = null;
   private courseChart: Chart | null = null;
@@ -56,59 +73,89 @@ export class DashboardComponent implements OnInit {
       intents: 'Intents',
       trainers: 'Trainers',
       config: 'Bot Config',
-      leads: 'Leads',      
+      leads: 'Leads',
       referrals: 'Referrals',
+      admins: 'Admin Management',
     };
     return titles[this.activeTab] ?? 'Dashboard';
   }
 
-  // ── Stats ──
+
   stats = { courses: 0, faqs: 0, intents: 0, trainers: 0 ,leads: 0 };
 
-  // ── Courses ──
+
+  admins: any[] = [];
+
+  editingAdminId: number | null = null;
+
+  adminForm = {
+    username: '',
+    password: ''
+  };
+
+
   courses: any[] = [];
   coursePage = 0;
+  courseTotal: number = 0;
   courseTotalPages = 1;
   courseFilter = { name: '', mode: '', isActive: '' };
-  courseForm: any = {};
+ courseForm: any = {
+   name: '',
+   duration: '',
+   skills: '',
+   mode: '',
+   highlights: '',
+   status: true,
 
-  // ── FAQs ──
+   batchTiming: '',
+   nextBatchDate: '',
+   brochureUrl: '',
+
+   placementSupport: '',
+   placementPercentage: '',
+   highestPackage: '',
+   hiringCompanies: '',
+ };
+
+
+  faqTotal: number = 0;
   faqs: any[] = [];
   faqPage = 0;
   faqTotalPages = 1;
   faqFilter = { question: '', isActive: '' };
   faqForm: any = {};
 
-  // ── Intents ──
+
   intents: any[] = [];
   intentPage = 0;
   intentTotalPages = 1;
   intentForm: any = {};
 
-  // ── Trainers ──
+
   trainers: any[] = [];
   trainerPage = 0;
   trainerTotalPages = 1;
   trainerFilter = { name: '', specialization: '' };
   trainerForm: any = {};
 
-  // ── Configs ──
+
   configs: any[] = [];
   configPage = 0;
   configTotalPages = 1;
   configFilter = { key: '' };
   configForm: any = {};
 
-  // ── Leads ──
+
 leads: any[] = [];
 leadPage = 0;
 leadTotalPages = 1;
 leadFilter = { phone: '', status: '', requestType: '' };
 
 
-// ── Referrals — add after leads properties ──
+
 referrals: any[] = [];
 referralPage = 0;
+referralTotal: number = 0;
 referralTotalPages = 1;
 referralFilter = { referrerPhone: '', referredPhone: '', status: '' };
 
@@ -120,12 +167,17 @@ referralFilter = { referrerPhone: '', referredPhone: '', status: '' };
 
   ngOnInit() {
     this.loadStats();
-    setTimeout(() => this.loadCharts(), 200);  
+    this.loadAdmins();
+    this.loadIntents();
+    this.loadTrainers();
+    this.loadFaqs();
+    this.loadCourses();
+    this.loadReferrals();
+    setTimeout(() => this.loadCharts(), 200);
   }
 
-  // ══════════════════════════════════════════
-  // TAB NAVIGATION
-  // ══════════════════════════════════════════
+
+
   setTab(tab: string) {
     this.activeTab = tab;
     if (tab === 'courses') this.loadCourses();
@@ -136,15 +188,19 @@ referralFilter = { referrerPhone: '', referredPhone: '', status: '' };
     if (tab === 'leads') this.loadLeads();
     if (tab === 'referrals') this.loadReferrals();
     if (tab === 'dashboard') setTimeout(() => this.loadCharts(), 100);
+    if (tab === 'intents') {
+        this.intentPage = 0;
+        this.loadIntents();
+      }
   }
+
+
 
   logout() {
     this.auth.logout();
   }
 
-  // ══════════════════════════════════════════
-  // STATS
-  // ══════════════════════════════════════════
+
   // loadStats() {
   //   this.http.get<any>(`${API}/courses?size=1`).subscribe(r => this.stats.courses = r.totalElements ?? 0);
   //   this.http.get<any>(`${API}/faqs?size=1`).subscribe(r => this.stats.faqs = r.totalElements ?? 0);
@@ -175,20 +231,133 @@ loadStats() {
   });
 }
 
-  // ══════════════════════════════════════════
-  // COURSES
-  // ══════════════════════════════════════════
-  loadCourses() {
-    let url = `${API}/courses?page=${this.coursePage}&size=8`;
-    if (this.courseFilter.name) url += `&name=${this.courseFilter.name}`;
-    if (this.courseFilter.mode) url += `&mode=${this.courseFilter.mode}`;
-    if (this.courseFilter.isActive !== '') url += `&isActive=${this.courseFilter.isActive}`;
 
-    this.http.get<any>(url).subscribe(res => {
-      this.courses = res ?? [];
-      this.courseTotalPages =1;
+  loadAdmins() {
+    this.http.get<any>(`${API}/admin/list`).subscribe({
+      next: (res) => {
+        this.admins = res?.data ?? res ?? [];
+        console.log("ADMINS:", this.admins);
+      },
+      error: (err) => console.error(err)
     });
   }
+
+
+
+  resetAdminForm() {
+    this.adminForm = {
+      username: '',
+      password: ''
+    };
+
+    this.editingAdminId = null;
+  }
+
+  toggleAdmin(id: number) {
+    this.http.post(`${API}/admin/toggle/${id}`, {})
+      .subscribe({
+        next: () => {
+          this.showToast('Admin updated');
+          this.loadAdmins();
+        },
+        error: () => this.showToast('Error updating admin', 'error')
+      });
+  }
+
+  saveAdmin() {
+
+    if (!this.adminForm.username || !this.adminForm.username.trim()) {
+      this.showToast('Username is required', 'error');
+      return;
+    }
+
+    if (!this.adminForm.password || !this.adminForm.password.trim()) {
+      this.showToast('Password is required', 'error');
+      return;
+    }
+
+    const payload = {
+      username: this.adminForm.username,
+      password: this.adminForm.password
+    };
+
+    if (this.editingAdminId) {
+      this.http.put(`${API}/admin/update/${this.editingAdminId}`, payload)
+        .subscribe({
+          next: () => {
+            this.showToast('Admin updated successfully');
+            this.loadAdmins();
+            this.resetAdminForm();
+          },
+          error: (err) => this.showToast('Error updating admin', 'error')
+        });
+    }
+
+    else {
+      this.http.post(`${API}/admin/add`, payload)
+        .subscribe({
+          next: () => {
+            this.showToast('Admin created successfully');
+            this.loadAdmins();
+            this.resetAdminForm();
+          },
+          error: (err) => this.showToast('Error creating admin', 'error')
+        });
+    }
+  }
+
+  editAdmin(a: any) {
+    this.editingAdminId = a.id;
+
+    this.adminForm = {
+      username: a.username,
+      password: ''
+    };
+
+    this.activeTab = 'admins';
+  }
+
+  deleteAdmin(id: number) {
+
+   if (!confirm('Delete this admin?')) return;
+
+   this.http.delete(`${API}/admin/${id}`)
+     .subscribe(() => {
+
+       this.loadAdmins();
+     });
+ }
+
+ loadCourses() {
+   let url = `${API}/courses?page=${this.coursePage}&size=8`;
+
+   if (this.courseFilter.name)
+     url += `&name=${this.courseFilter.name}`;
+
+   if (this.courseFilter.mode)
+     url += `&mode=${this.courseFilter.mode}`;
+
+   if (this.courseFilter.isActive !== '')
+     url += `&isActive=${this.courseFilter.isActive}`;
+
+   this.http.get<any>(url).subscribe({
+     next: (res) => {
+
+       console.log("COURSE RESPONSE:", res);
+
+       this.stats.courses = res.total || 0;
+       this.courses = res.data ?? [];
+       this.courseTotalPages = res.totalPages ?? 1;
+       this.courseTotal = res.total ?? 0;
+
+     },
+     error: (err) => {
+       console.error("Course API error:", err);
+       this.courses = [];
+       this.courseTotalPages = 1;
+     }
+   });
+ }
 
   editCourse(c: any) {
     this.editingId = c.id;
@@ -237,20 +406,31 @@ error:()=>this.showToast('Failed to toggle status.','error')
         error: () => this.showToast('Delete failed.', 'error')
       });
   }
-  // ══════════════════════════════════════════
-  // FAQS
-  // ══════════════════════════════════════════
-  loadFaqs() {
-    let url = `${API}/faqs?page=${this.faqPage}&size=8`;
-    if (this.faqFilter.question) url += `&question=${this.faqFilter.question}`;
-    if (this.faqFilter.isActive !== '') url += `&isActive=${this.faqFilter.isActive}`;
 
-    this.http.get<any>(url).subscribe(res => {
-      this.faqs = res ?? [];
-      
-      this.faqTotalPages =  1;
-    });
-  }
+
+loadFaqs() {
+  this.http.get<any>(
+    `${API}/faqs?page=${this.faqPage}&size=8`
+  ).subscribe({
+    next: (res) => {
+
+      console.log("FAQ RESPONSE:", res);
+
+
+      this.stats.faqs = res.total || 0;
+
+      this.faqs = res.data ?? res ?? [];
+
+      this.faqTotal = res.total ?? this.faqs.length ?? 0;
+      this.faqTotalPages = res.totalPages ?? 1;
+
+    },
+    error: (err) => {
+      console.error("FAQ API error:", err);
+      this.faqs = [];
+    }
+  });
+}
 
   editFaq(f: any) {
     this.editingId = f.id;
@@ -278,7 +458,7 @@ error:()=>this.showToast('Failed to toggle status.','error')
 toggleFaqStatus(f: any) {
   this.http.patch(`${API}/faqs/${f.id}/status?status=${!f.status}`, {}, { responseType: 'text' })
     .subscribe({
-      next: () => { f.status = !f.status;this.loadStats();this.showToast('Status updated!'); },  // 
+      next: () => { f.status = !f.status;this.loadStats();this.showToast('Status updated!'); },  //
       error: () => this.showToast('Failed to toggle status.', 'error')
     });
 }
@@ -296,15 +476,27 @@ toggleFaqStatus(f: any) {
       });
   }
 
-  // ══════════════════════════════════════════
-  // INTENTS
-  // ══════════════════════════════════════════
-  loadIntents() {
-    this.http.get<any>(`${API}/intents?page=${this.intentPage}&size=8`).subscribe(res => {
-      this.intents = res ?? [];
-      this.intentTotalPages =  1;
-    });
-  }
+loadIntents() {
+  this.http.get<any>(
+    `${API}/intents?page=${this.intentPage}&size=8`
+  ).subscribe({
+    next: (res) => {
+
+      console.log("INTENT RESPONSE:", res);
+
+
+       this.stats.intents = res.total || 0;
+      this.intents = res.data || [];
+
+      this.intentTotalPages = res.totalPages || 1;
+    },
+    error: (err) => {
+      console.error("Intent API error:", err);
+      this.intents = [];
+    }
+  });
+}
+
 
 editIntent(i: any) {
   this.editingId = i.id;
@@ -364,19 +556,35 @@ editIntent(i: any) {
       });
   }
 
-// ══════════════════════════════════════════
-// REFERRALS
-// ══════════════════════════════════════════
-loadReferrals() {
-    let url = `${API}/referrals?page=${this.referralPage}&size=10`;
-    if (this.referralFilter.referrerPhone) url += `&referrerPhone=${this.referralFilter.referrerPhone}`;
-    if (this.referralFilter.referredPhone) url += `&referredPhone=${this.referralFilter.referredPhone}`;
-    if (this.referralFilter.status)        url += `&status=${this.referralFilter.status}`;
 
-    this.http.get<any>(url).subscribe(res => {
-        this.referrals = res ?? [];
-        this.referralTotalPages = 1;
-    });
+loadReferrals() {
+  let url = `${API}/referrals?page=${this.referralPage}&size=10`;
+
+  if (this.referralFilter.referrerPhone)
+    url += `&referrerPhone=${this.referralFilter.referrerPhone}`;
+
+  if (this.referralFilter.referredPhone)
+    url += `&referredPhone=${this.referralFilter.referredPhone}`;
+
+  if (this.referralFilter.status)
+    url += `&status=${this.referralFilter.status}`;
+
+  this.http.get<any>(url).subscribe({
+    next: (res) => {
+
+      console.log("REFERRAL RESPONSE:", res);
+
+      this.referrals = res.data ?? [];
+      this.referralTotalPages = res.totalPages ?? 1;
+      this.referralTotal = res.total ?? 0;
+
+    },
+    error: (err) => {
+      console.error("Referral API error:", err);
+      this.referrals = [];
+      this.referralTotalPages = 1;
+    }
+  });
 }
 
 updateReferralStatus(id: number, event: Event) {
@@ -392,24 +600,27 @@ updateReferralStatus(id: number, event: Event) {
         });
 }
 
-  // ══════════════════════════════════════════
-  // TRAINERS
-  // ══════════════════════════════════════════
-loadTrainers(){
-let url=`${API}/trainers?page=${this.trainerPage}&size=8`;
 
-if(this.trainerFilter.name){
-url+=`&name=${this.trainerFilter.name}`;
-}
+loadTrainers() {
+  let url = `${API}/trainers?page=${this.trainerPage}&size=8`;
 
-if(this.trainerFilter.specialization){
-url+=`&specialization=${this.trainerFilter.specialization}`;
-}
+  if (this.trainerFilter.name) {
+    url += `&name=${this.trainerFilter.name}`;
+  }
 
-this.http.get<any>(url).subscribe(res=>{
-this.trainers=res.data??[];
-this.trainerTotalPages=1;
-},);
+  if (this.trainerFilter.specialization) {
+    url += `&specialization=${this.trainerFilter.specialization}`;
+  }
+
+  this.http.get<any>(url).subscribe(res => {
+
+    console.log("TRAINER RESPONSE:", res);
+
+    this.trainers = res.data ?? res ?? [];
+
+
+    this.trainerTotalPages = res.totalPages ?? 1;
+  });
 }
 
   editTrainer(t: any) {
@@ -458,12 +669,10 @@ this.trainerTotalPages=1;
       });
   }
 
-  // ══════════════════════════════════════════
-  // BOT CONFIG
-  // ══════════════════════════════════════════
+
 loadConfigs() {
   let url = `${API}/config?page=${this.configPage}&size=10`;
-  if (this.configFilter.key) url += `&key=${this.configFilter.key}`;  //  this is fine
+  if (this.configFilter.key) url += `&key=${this.configFilter.key}`;
 
   this.http.get<any>(url).subscribe(res => {
     this.configs = res ?? [];
@@ -472,10 +681,10 @@ loadConfigs() {
 }
 
  editConfig(cfg: any) {
-  this.editingKey = cfg.configKey;          //  was cfg.key
-  this.configForm = { 
-    key: cfg.configKey,                      //  map to form fields
-    value: cfg.configValue 
+  this.editingKey = cfg.configKey;
+  this.configForm = {
+    key: cfg.configKey,
+    value: cfg.configValue
   };
   this.modal = 'config';
 }
@@ -487,7 +696,7 @@ saveConfig() {
   }
   this.modalLoading = true;
   this.modalError = '';
-  const payload = { configKey: this.configForm.key, configValue: this.configForm.value };  
+  const payload = { configKey: this.configForm.key, configValue: this.configForm.value };
   const req = this.editingKey
     ? this.http.put(`${API}/config/${this.editingKey}`, payload)
     : this.http.post(`${API}/config`, payload);
@@ -507,11 +716,6 @@ deleteConfig(key: string) {
     });
 }
 
-// ══════════════════════════════════════════
-// Leads Config
-// ══════════════════════════════════════════
-
-
 loadLeads() {
     let url = `${API}/leads?page=${this.leadPage}&size=10&sortBy=id&direction=desc`;
     if (this.leadFilter.phone) url += `&phone=${this.leadFilter.phone}`;
@@ -526,7 +730,7 @@ loadLeads() {
 
 updateLeadStatus(id: number, event: Event) {
     const status = (event.target as HTMLSelectElement).value;
-    this.http.patch(`${API}/leads/${id}/status?status=${status}`, {}, 
+    this.http.patch(`${API}/leads/${id}/status?status=${status}`, {},
                     { responseType: 'text' })
         .subscribe({
             next: () => {
@@ -538,7 +742,7 @@ updateLeadStatus(id: number, event: Event) {
         });
 }
 
-// ── Analytics Charts ──
+
 loadCharts() {
     if (this.statusChart)         { this.statusChart.destroy();         this.statusChart = null;         }
     if (this.courseChart)         { this.courseChart.destroy();         this.courseChart = null;         }
@@ -628,20 +832,20 @@ renderStatusChart(data: any) {
     type: 'doughnut',
     data: {
       labels: Object.keys(data),
-      datasets: [{ 
-        data: Object.values<number>(data), 
-        backgroundColor: ['#EF9F27','#1D9E75','#D85A30'], 
-        borderWidth: 0 
+      datasets: [{
+        data: Object.values<number>(data),
+        backgroundColor: ['#EF9F27','#1D9E75','#D85A30'],
+        borderWidth: 0
       }]
     },
     options: {
       maintainAspectRatio: false,
       cutout: '65%',
-      plugins: { 
-        legend: { 
-          position: 'right',           // ← change from 'bottom' to 'right'
+      plugins: {
+        legend: {
+          position: 'right',
           labels: { font: { size: 11 }, boxWidth: 10 }
-        } 
+        }
       }
     }
   });
@@ -675,24 +879,23 @@ renderCourseChart(data: any) {
     type: 'doughnut',
     data: {
       labels: Object.keys(truncated),
-      datasets: [{ 
-        data: Object.values<number>(truncated), 
-        backgroundColor: ['#7F77DD','#378ADD','#5DCAA5','#D85A30','#EF9F27','#D4537E'], 
-        borderWidth: 0 
+      datasets: [{
+        data: Object.values<number>(truncated),
+        backgroundColor: ['#7F77DD','#378ADD','#5DCAA5','#D85A30','#EF9F27','#D4537E'],
+        borderWidth: 0
       }]
     },
     options: {
       maintainAspectRatio: false,
-      cutout: '65%',                  
-      plugins: { 
-        legend: { 
-          position: 'right',          
-          labels: { 
-            font: { size: 11 }, 
+      cutout: '65%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            font: { size: 11 },
             boxWidth: 10
-            // ← generateLabels removed
-          } 
-        } 
+          }
+        }
       }
     }
   });
@@ -709,24 +912,23 @@ renderFaqChart(data: any) {
     type: 'doughnut',
     data: {
       labels: Object.keys(truncated),
-      datasets: [{ 
-        data: Object.values<number>(truncated), 
-        backgroundColor: ['#378ADD','#1D9E75','#EF9F27','#D85A30','#7F77DD'], 
-        borderWidth: 0 
+      datasets: [{
+        data: Object.values<number>(truncated),
+        backgroundColor: ['#378ADD','#1D9E75','#EF9F27','#D85A30','#7F77DD'],
+        borderWidth: 0
       }]
     },
     options: {
       maintainAspectRatio: false,
       cutout: '65%',
-      plugins: { 
-        legend: { 
-          position: 'right', 
-          labels: { 
-            font: { size: 11 }, 
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            font: { size: 11 },
             boxWidth: 10
-            // ← generateLabels removed
-          } 
-        } 
+          }
+        }
       }
     }
   });
@@ -771,14 +973,10 @@ renderTimeChart(data: any) {
         y: { beginAtZero: true, ticks: { stepSize: 1 } },
         x: { ticks: { font: { size: 11 } } }
       }
-    }
+    },
   });
 }
 
-
-  // ══════════════════════════════════════════
-  // MODAL HELPERS
-  // ══════════════════════════════════════════
   openModal(type: string) {
     this.modal = type;
     this.editingId = null;
@@ -786,8 +984,19 @@ renderTimeChart(data: any) {
     this.modalError = '';
     this.modalLoading = false;
 
-    // reset forms
-    this.courseForm = { isActive: true };
+
+    this.courseForm = {
+      isActive: true,
+
+      batchTiming: '',
+      nextBatchDate: '',
+      brochureUrl: '',
+
+      placementSupport: '',
+      placementPercentage: '',
+      highestPackage: '',
+      hiringCompanies: '',
+    };
     this.faqForm = { isActive: true };
     this.intentForm = { intentName: '', keywords: '', actionType: '', responseTemplate: '', status: true };
     this.trainerForm = {};
