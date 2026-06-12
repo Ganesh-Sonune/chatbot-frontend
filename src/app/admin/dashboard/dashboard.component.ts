@@ -45,7 +45,6 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-
   sidebarCollapsed = false;
   activeTab = 'dashboard';
   modal: string | null = null;
@@ -55,6 +54,7 @@ export class DashboardComponent implements OnInit {
   toastType: 'success' | 'error' = 'success';
   editingId: number | null = null;
   editingKey: string | null = null;
+//   editingAdminId: number | null = null;
 
   private statusChart: Chart | null = null;
   private courseChart: Chart | null = null;
@@ -85,6 +85,8 @@ export class DashboardComponent implements OnInit {
 
 
   admins: any[] = [];
+
+  editingAdminId: number | null = null;
 
   adminForm = {
     username: '',
@@ -240,34 +242,15 @@ loadStats() {
     });
   }
 
-  addAdmin() {
-    if (!this.adminForm.username || !this.adminForm.password) {
-      this.showToast('Enter username & password', 'error');
-      return;
-    }
 
-    const payload = {
-      username: this.adminForm.username,
-      password: this.adminForm.password,
-      role: 'ROLE_ADMIN',
-      enabled: true
+
+  resetAdminForm() {
+    this.adminForm = {
+      username: '',
+      password: ''
     };
 
-    this.http.post(`${API}/admin/add`, payload)
-      .subscribe({
-        next: () => {
-          this.showToast('Admin added!');
-          this.adminForm = { username: '', password: '' };
-          this.loadAdmins();
-        },
-        error: (err) => {
-          console.log("ADMIN ERROR:", err);
-          this.showToast(
-            err?.error?.message || 'Failed to add admin',
-            'error'
-          );
-        }
-      });
+    this.editingAdminId = null;
   }
 
   toggleAdmin(id: number) {
@@ -281,6 +264,69 @@ loadStats() {
       });
   }
 
+  saveAdmin() {
+
+    if (!this.adminForm.username || !this.adminForm.username.trim()) {
+      this.showToast('Username is required', 'error');
+      return;
+    }
+
+    if (!this.adminForm.password || !this.adminForm.password.trim()) {
+      this.showToast('Password is required', 'error');
+      return;
+    }
+
+    const payload = {
+      username: this.adminForm.username,
+      password: this.adminForm.password
+    };
+
+    if (this.editingAdminId) {
+      this.http.put(`${API}/admin/update/${this.editingAdminId}`, payload)
+        .subscribe({
+          next: () => {
+            this.showToast('Admin updated successfully');
+            this.loadAdmins();
+            this.resetAdminForm();
+          },
+          error: (err) => this.showToast('Error updating admin', 'error')
+        });
+    }
+
+    else {
+      this.http.post(`${API}/admin/add`, payload)
+        .subscribe({
+          next: () => {
+            this.showToast('Admin created successfully');
+            this.loadAdmins();
+            this.resetAdminForm();
+          },
+          error: (err) => this.showToast('Error creating admin', 'error')
+        });
+    }
+  }
+
+  editAdmin(a: any) {
+    this.editingAdminId = a.id;
+
+    this.adminForm = {
+      username: a.username,
+      password: ''
+    };
+
+    this.activeTab = 'admins';
+  }
+
+  deleteAdmin(id: number) {
+
+   if (!confirm('Delete this admin?')) return;
+
+   this.http.delete(`${API}/admin/${id}`)
+     .subscribe(() => {
+
+       this.loadAdmins();
+     });
+ }
 
  loadCourses() {
    let url = `${API}/courses?page=${this.coursePage}&size=8`;
@@ -312,8 +358,6 @@ loadStats() {
      }
    });
  }
-
-
 
   editCourse(c: any) {
     this.editingId = c.id;
@@ -929,7 +973,7 @@ renderTimeChart(data: any) {
         y: { beginAtZero: true, ticks: { stepSize: 1 } },
         x: { ticks: { font: { size: 11 } } }
       }
-    }
+    },
   });
 }
 
